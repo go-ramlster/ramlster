@@ -13,11 +13,11 @@ Compatibility
 Installation and usage
 ----------------------
 
-The import path for the package is *gopkg.in/ramlster.v0*.
-
 To install it, run:
 
     go get gopkg.in/ramlster.v0
+
+The import path for the package is *gopkg.in/ramlster.v0*.
 
 API documentation
 -----------------
@@ -31,11 +31,10 @@ API stability
 
 The package API for ramlster will remain stable as described in [gopkg.in](https://gopkg.in).
 
-
 License
 -------
 
-The ramlster package is licensed under the MIT. Please see the LICENSE file for details.
+Ramlster package is released under the terms of the MIT license. Please see the LICENSE file for details.
 
 Example
 -------
