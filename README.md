@@ -42,4 +42,10 @@ Example
 
 ```Go
 package main
+
+import (
+	"fmt"
+	"log"
+	"gopkg.in/ramlster.v0"
+)
 ```
