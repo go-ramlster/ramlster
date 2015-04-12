@@ -1,0 +1,77 @@
+#%RAML 0.8
+title: simple-service API
+version: v1
+baseUri: "http://simple-service.com"
+mediaType: application/json
+schemas: 
+    - 
+        createdCart: |
+                {
+                  "type" : "object",
+                  "$schema" : "http://json-schema.org/draft-04/schema",
+                  "required" : false,
+                  "properties" : {
+                    "cartId" : {
+                      "type" : "string",
+                      "required" : true
+                    }
+                  }
+                }
+    - 
+        changeCurrency: |
+                {
+                  "type" : "object",
+                  "$schema" : "http://json-schema.org/draft-04/schema",
+                  "required" : "true",
+                  "properties" : {
+                    "currency" : {
+                      "type" : "string",
+                      "required" : true,
+                      "pattern" : "[A-Z]{3}"
+                    }
+                  }
+                }
+/{tenant}/carts: 
+    post: 
+        description: Creates a cart.
+        body: 
+            application/json: 
+                schema: createCart
+        responses: 
+            "201": 
+                description: A unique cart Item ID is returned.
+                body: 
+                    application/json: 
+                        schema: createdCart
+        is: [anonymousUserAware]
+    get: 
+        description: Get carts by customer Id .
+        queryParameters: 
+            customerId: 
+                description: |
+                    Reference to the customer
+                type: string
+                required: false
+                repeat: false
+        responses: 
+            "200": 
+                description: The request has succeeded. A list of cart is returned.
+                body: 
+                    application/json: 
+                        schema: cart
+    /{cartId}: 
+        uriParameters: 
+            cartId: 
+                displayName: cartId
+                type: string
+                required: true
+                repeat: false
+        is: [appAware]
+        get: 
+            description: Get a specific cart by ID
+            responses: 
+                "200": 
+                    description: The request has succeeded. A unique cart is returned.
+                    body: 
+                        application/json: 
+                            schema: cart

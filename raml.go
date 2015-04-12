@@ -1,48 +1,77 @@
-package main
+package ramlster
 
-import (
-	"fmt"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
-	"os"
-)
+type MediaType string
+type HttpHeader string
+type HttpStatusCode int
+type HeaderType map[HttpHeader]NamedParameters
+type ResponseType map[HttpStatusCode]Response
+type BodyType map[MediaType]Body
 
-var data = `
-a: Easy!
-b:
-  c: 2
-  d: [3, 4]
-`
-var y = make(map[interface{}]interface{})
-
-func unmarshalString() {
-	err := yaml.Unmarshal([]byte(data), y)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("y :\n%+v\n", y)
+type Raml struct {
+	SpecVersion   string
+	Title         string
+	BaseUri       string `yaml:"baseUri"`
+	Version       string
+	MediaType     MediaType `yaml:"mediaType"`
+	Protocols     []string
+	Schemas       []map[string]string
+	Resources     []Resource
+	Documentation Documentation
 }
 
-func unmarshalFile() {
-	file, err := os.Open("./examples/cart-service.raml")
-	defer file.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	source, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = yaml.Unmarshal(source, y)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("y :\n%+v\n", y)
+type Documentation struct {
+	Title   string
+	Content string
 }
 
-func main() {
-	//unmarshalString()
-	unmarshalFile()
+type Resource struct {
+	RelativeUri string
+	DisplayName string `yaml:"displayName"`
+	Description string
+	Resources   []Resource
+	Methods     []Method
+}
+
+type Method struct {
+	Description     string
+	Headers         HeaderType
+	Protocols       []string
+	QueryParameters map[string]NamedParameters `yaml:"queryParameters"`
+	Body            BodyType
+	Responses       ResponseType
+}
+
+type Body struct {
+	FormParameters map[string]NamedParameters `yaml:"formParameters"`
+	Schema         string
+	Example        string
+}
+
+type Response struct {
+	Description string
+	Headers     HeaderType
+	BodyType
+}
+
+// NamedParameters are present in the following propertires:
+// * URI parameters
+// * Query string parameters
+// * Form parameters
+// * Request bodies (depending on the media type)
+// * Request headers
+// * Response headers
+type NamedParameters struct {
+	DisplayName string
+	Description string
+	Type        string
+	Enum        []string
+	Pattern     string
+	MinLength   int
+	MaxLength   int
+	Minimum     int
+	Maximum     int
+	Example     string
+	Repeat      bool
+	Required    bool
+	Default     string
 }
