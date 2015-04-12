@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/go-ramlster/ramlster.svg)](https://travis-ci.org/go-ramlster/ramlster)
+
 # Ramlster
 
 *Pronounced as "ramster".*
