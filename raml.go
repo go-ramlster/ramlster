@@ -1,10 +1,15 @@
 package ramlster
 
-type MediaType string
+type Schema map[string]string
+type HttpMethod string
+
 type HttpHeader string
-type HttpStatusCode int
 type HeaderType map[HttpHeader]NamedParameters
+
+type HttpStatusCode int
 type ResponseType map[HttpStatusCode]Response
+
+type MediaType string
 type BodyType map[MediaType]Body
 
 type Raml struct {
@@ -14,9 +19,9 @@ type Raml struct {
 	Version       string
 	MediaType     MediaType `yaml:"mediaType"`
 	Protocols     []string
-	Schemas       []map[string]string
+	Schemas       []Schema
 	Resources     []Resource
-	Documentation Documentation
+	Documentation []Documentation
 }
 
 type Documentation struct {
@@ -33,6 +38,7 @@ type Resource struct {
 }
 
 type Method struct {
+	HttpMethod      HttpMethod
 	Description     string
 	Headers         HeaderType
 	Protocols       []string

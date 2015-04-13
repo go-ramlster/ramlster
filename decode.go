@@ -2,7 +2,9 @@ package ramlster
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v2"
 )
 
@@ -14,15 +16,45 @@ import (
 //if err := unmarshal(&localRaml); err != nil {
 //return err
 //}
-//r.Title = localRaml.Title
-//r.Schemas = localRaml.Schemas
 //return nil
 //}
 
-//func Unmarshal(data []byte, out interface{}) (err error) {
 func Unmarshal(data []byte) (raml Raml, err error) {
 	err = yaml.Unmarshal(data, &raml)
-	//spew.Dump(raml)
+	if err != nil {
+		return
+	}
+
+	ramlMap := make(map[interface{}]interface{})
+	err = yaml.Unmarshal(data, &ramlMap)
+	if err != nil {
+		return
+	}
+	err = parse(&raml, ramlMap)
+	return
+}
+
+func isResource(entry string) bool {
+	return strings.HasPrefix(entry, "/")
+}
+
+func parse(raml *Raml, ramlMap map[interface{}]interface{}) (err error) {
+	raml.Resources = parseResources(ramlMap)
+	spew.Dump(raml)
+	return nil
+}
+
+func parseResources(ramlMap map[interface{}]interface{}) (resources []Resource) {
+	for key, value := range ramlMap {
+		if uri, ok := key.(string); ok && isResource(uri) {
+			resource := Resource{}
+			resource.RelativeUri = uri
+			if v, ok := value.(map[interface{}]interface{}); ok {
+				resource.Resources = parseResources(v)
+			}
+			resources = append(resources, resource)
+		}
+	}
 	return
 }
 

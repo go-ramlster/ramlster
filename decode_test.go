@@ -8,6 +8,7 @@ import (
 )
 
 func TestUnmarshalFile(t *testing.T) {
+	//file, err := os.Open("./examples/github-api-v3.raml")
 	file, err := os.Open("./examples/simple-cart.raml")
 	defer file.Close()
 	if err != nil {
@@ -18,10 +19,8 @@ func TestUnmarshalFile(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	raml, err := Unmarshal(source)
+	_, err = Unmarshal(source)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(raml)
-	t.Log("test log")
 }

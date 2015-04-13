@@ -3,6 +3,12 @@ title: simple-service API
 version: v1
 baseUri: "http://simple-service.com"
 mediaType: application/json
+protocols: [HTTP, HTTPS]
+documentation:
+    - title: index
+      content: Hello world
+    - title: simple
+      content: A simple documentation
 schemas: 
     - 
         createdCart: |
@@ -31,7 +37,7 @@ schemas:
                     }
                   }
                 }
-/{tenant}/carts: 
+/carts: 
     post: 
         description: Creates a cart.
         body: 
@@ -75,3 +81,21 @@ schemas:
                     body: 
                         application/json: 
                             schema: cart
+/calculation:
+    get: 
+        description: Get cart calculation
+        responses: 
+            "200": 
+                description: The request has succeeded. The cart calculation is returned
+                body: 
+                    application/json: 
+                        schema: cart
+    /{calculationId}:
+        get:
+            description: Get cart calculation by id
+        /changeCurrency:
+            post:
+                description: Change currency
+        /refresh:
+            post:
+                description: Refresh the calculation
