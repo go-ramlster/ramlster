@@ -54,12 +54,12 @@ type Response struct {
 }
 
 // NamedParameters are present in the following propertires:
-// * URI parameters
-// * Query string parameters
-// * Form parameters
-// * Request bodies (depending on the media type)
-// * Request headers
-// * Response headers
+//     * URI parameters
+//     * Query string parameters
+//     * Form parameters
+//     * Request bodies (depending on the media type)
+//     * Request headers
+//     * Response headers
 type NamedParameters struct {
 	DisplayName string
 	Description string
