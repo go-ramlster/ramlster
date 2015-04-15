@@ -1,23 +1,11 @@
 package ramlster
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v2"
 )
-
-//type raml Raml
-
-//func (r *Raml) UnmarshalYAML(unmarshal func(interface{}) error) error {
-//var localRaml raml
-
-//if err := unmarshal(&localRaml); err != nil {
-//return err
-//}
-//return nil
-//}
 
 func Unmarshal(data []byte) (raml Raml, err error) {
 	err = yaml.Unmarshal(data, &raml)
@@ -39,45 +27,49 @@ func isResource(entry string) bool {
 }
 
 func parse(raml *Raml, ramlMap map[interface{}]interface{}) (err error) {
-	raml.Resources = parseResources(ramlMap)
+	raml.Resources, err = parseResources(ramlMap, nil)
 	spew.Dump(raml)
-	return nil
+	return
 }
 
-func parseResources(ramlMap map[interface{}]interface{}) (resources []Resource) {
+func parseResources(ramlMap map[interface{}]interface{}, parentResouce *Resource) (resources []Resource, err error) {
 	for key, value := range ramlMap {
-		if uri, ok := key.(string); ok && isResource(uri) {
-			resource := Resource{}
-			resource.RelativeUri = uri
-			if v, ok := value.(map[interface{}]interface{}); ok {
-				resource.Resources = parseResources(v)
+		if k, ok := key.(string); ok {
+			if isResource(k) {
+				resource := Resource{}
+				resource.RelativeUri = k
+				if v, ok := value.(map[interface{}]interface{}); ok {
+					resource.Resources, err = parseResources(v, &resource)
+				}
+				resources = append(resources, resource)
+			} else if parentResouce != nil {
+				switch k {
+				case "displayName":
+					parentResouce.DisplayName = value.(string)
+				case "description":
+					parentResouce.Description = value.(string)
+				case "get", "post", "put", "delete":
+					method := parseMethod(k, value)
+					parentResouce.Methods = append(parentResouce.Methods, method)
+				}
 			}
-			resources = append(resources, resource)
 		}
 	}
 	return
 }
 
-func printMap(myMap map[interface{}]interface{}, ctd int) {
-	var tabs string
-	for i := 0; i < ctd; i++ {
-		tabs += "\t"
-	}
-	for key, value := range myMap {
-
-		fmt.Printf("%v%+v:\n", tabs, key)
-		v, ok := value.(map[interface{}]interface{})
-		if ok {
-			ctd++
-			printMap(v, ctd)
-		} else if v, ok := value.([]interface{}); ok {
-			for _, l := range v {
-				if lista, ok := l.(map[interface{}]interface{}); ok {
-					printMap(lista, ctd)
+func parseMethod(name string, methodData interface{}) (method Method) {
+	method.HttpMethod = HttpMethod(name)
+	if methodMap, ok := methodData.(map[interface{}]interface{}); ok {
+		for key, value := range methodMap {
+			if k, ok := key.(string); ok {
+				switch k {
+				case "description":
+					method.Description = value.(string)
 				}
 			}
-		} else {
-			fmt.Printf("%v\t%v\n", tabs, value)
 		}
+
 	}
+	return
 }

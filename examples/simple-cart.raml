@@ -38,6 +38,8 @@ schemas:
                   }
                 }
 /carts: 
+    displayName: Carts
+    description: Cart resource.
     post: 
         description: Creates a cart.
         body: 
@@ -51,7 +53,7 @@ schemas:
                         schema: createdCart
         is: [anonymousUserAware]
     get: 
-        description: Get carts by customer Id .
+        description: Get carts by customer Id
         queryParameters: 
             customerId: 
                 description: |
@@ -66,6 +68,8 @@ schemas:
                     application/json: 
                         schema: cart
     /{cartId}: 
+        displayName: CartById
+        description: Carts by Id
         uriParameters: 
             cartId: 
                 displayName: cartId
@@ -82,6 +86,8 @@ schemas:
                         application/json: 
                             schema: cart
 /calculation:
+    displayName: Calculation
+    description: The calculation resource
     get: 
         description: Get cart calculation
         responses: 
@@ -91,11 +97,17 @@ schemas:
                     application/json: 
                         schema: cart
     /{calculationId}:
+        displayName: CalculationById
+        description: The calculation by id resource
         get:
             description: Get cart calculation by id
         /changeCurrency:
+            displayName: ChangeCurrency
+            description: The change currency resource
             post:
                 description: Change currency
         /refresh:
+            displayName: Refresh
+            description: The refresh resource
             post:
                 description: Refresh the calculation
