@@ -18,18 +18,13 @@ func Unmarshal(data []byte) (raml Raml, err error) {
 	if err != nil {
 		return
 	}
-	err = parse(&raml, ramlMap)
+	raml.Resources, err = parseResources(ramlMap, nil)
+	spew.Dump(raml)
 	return
 }
 
 func isResource(entry string) bool {
 	return strings.HasPrefix(entry, "/")
-}
-
-func parse(raml *Raml, ramlMap map[interface{}]interface{}) (err error) {
-	raml.Resources, err = parseResources(ramlMap, nil)
-	spew.Dump(raml)
-	return
 }
 
 func parseResources(ramlMap map[interface{}]interface{}, parentResouce *Resource) (resources []Resource, err error) {
