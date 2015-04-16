@@ -31,7 +31,7 @@ type Documentation struct {
 
 type Resource struct {
 	RelativeUri string
-	DisplayName string `yaml:"displayName"`
+	DisplayName string
 	Description string
 	Resources   []Resource
 	Methods     []Method
@@ -42,13 +42,13 @@ type Method struct {
 	Description     string
 	Headers         HeaderType
 	Protocols       []string
-	QueryParameters map[string]NamedParameters `yaml:"queryParameters"`
+	QueryParameters map[string]NamedParameters
 	Body            BodyType
 	Responses       ResponseType
 }
 
 type Body struct {
-	FormParameters map[string]NamedParameters `yaml:"formParameters"`
+	FormParameters map[string]NamedParameters
 	Schema         string
 	Example        string
 }
@@ -59,7 +59,7 @@ type Response struct {
 	BodyType
 }
 
-// NamedParameters are present in the following propertires:
+// NamedParameters are present in the following properties:
 //     * URI parameters
 //     * Query string parameters
 //     * Form parameters

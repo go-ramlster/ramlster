@@ -42,6 +42,12 @@ schemas:
     description: Cart resource.
     post: 
         description: Creates a cart.
+        protocols: [HTTPS]
+        headers:
+            Version:
+                type: integer
+            Request-Id:
+                type: integer
         body: 
             application/json: 
                 schema: createCart
@@ -54,6 +60,15 @@ schemas:
         is: [anonymousUserAware]
     get: 
         description: Get carts by customer Id
+        protocols: [HTTP]
+        headers:
+          Some-Media-Type:
+            description: |
+              You can check the current version of media type in responses.
+            type: string
+          Accept:
+            description: Is used to set specified media type.
+            type: string
         queryParameters: 
             customerId: 
                 description: |
@@ -79,6 +94,7 @@ schemas:
         is: [appAware]
         get: 
             description: Get a specific cart by ID
+            protocols: [HTTP, HTTPS]
             responses: 
                 "200": 
                     description: The request has succeeded. A unique cart is returned.

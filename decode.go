@@ -20,6 +20,7 @@ func Unmarshal(data []byte) (raml Raml, err error) {
 	}
 	raml.Resources, err = parseResources(ramlMap, nil)
 	spew.Dump(raml)
+	//spew.Dump(ramlMap)
 	return
 }
 
@@ -61,10 +62,70 @@ func parseMethod(name string, methodData interface{}) (method Method) {
 				switch k {
 				case "description":
 					method.Description = value.(string)
+				case "protocols":
+					//method.Protocols = parseProtocols(value.([]interface{}))
+					method.Protocols = parseStringSlice(value.([]interface{}))
+				case "headers":
+					method.Headers = parseHeaders(value.(map[interface{}]interface{}))
 				}
 			}
 		}
+	}
+	return
+}
 
+func parseStringSlice(stringSlice []interface{}) []string {
+	var strings []string
+	for _, str := range stringSlice {
+		strings = append(strings, str.(string))
+	}
+	return strings
+}
+func parseHeaders(headersI map[interface{}]interface{}) HeaderType {
+	h := make(map[HttpHeader]NamedParameters)
+	for key, value := range headersI {
+		if header, ok := key.(string); ok {
+			if params, ok := value.(map[interface{}]interface{}); ok {
+				namedParameters := parseNamedParameters(params)
+				h[HttpHeader(header)] = namedParameters
+			}
+		}
+	}
+	return HeaderType(h)
+}
+
+func parseNamedParameters(params map[interface{}]interface{}) (namedParameters NamedParameters) {
+	for key, value := range params {
+		if paramName, ok := key.(string); ok {
+			switch paramName {
+			case "displayName":
+				namedParameters.DisplayName = value.(string)
+			case "description":
+				namedParameters.Description = value.(string)
+			case "type":
+				namedParameters.Type = value.(string)
+			case "enum":
+				namedParameters.Enum = parseStringSlice(value.([]interface{}))
+			case "pattern":
+				namedParameters.Pattern = value.(string)
+			case "MinLength":
+				namedParameters.MinLength = value.(int)
+			case "maxLength":
+				namedParameters.MaxLength = value.(int)
+			case "minimum":
+				namedParameters.Minimum = value.(int)
+			case "maximum":
+				namedParameters.Maximum = value.(int)
+			case "example":
+				namedParameters.Example = value.(string)
+			case "repeat":
+				namedParameters.Repeat = value.(bool)
+			case "required":
+				namedParameters.Required = value.(bool)
+			case "default":
+				namedParameters.Default = value.(string)
+			}
+		}
 	}
 	return
 }
