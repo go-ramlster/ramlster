@@ -1,16 +1,12 @@
 package ramlster
 
-type Schema map[string]string
 type HttpMethod string
-
 type HttpHeader string
-type HeaderType map[HttpHeader]NamedParameters
-
 type HttpStatusCode int
-type ResponseType map[HttpStatusCode]Response
+type QueryParameter string
+type Schema map[string]string
 
 type MediaType string
-type BodyType map[MediaType]Body
 
 type Raml struct {
 	SpecVersion   string
@@ -40,23 +36,24 @@ type Resource struct {
 type Method struct {
 	HttpMethod      HttpMethod
 	Description     string
-	Headers         HeaderType
+	Headers         map[HttpHeader]NamedParameters
 	Protocols       []string
-	QueryParameters map[string]NamedParameters
-	Body            BodyType
-	Responses       ResponseType
+	QueryParameters map[QueryParameter]NamedParameters
+	Body            map[MediaType]Body
+	Responses       map[HttpStatusCode]Response
 }
 
 type Body struct {
-	FormParameters map[string]NamedParameters
 	Schema         string
 	Example        string
+	FormParameters map[string]NamedParameters
 }
 
+type bodyType map[MediaType]Body
 type Response struct {
 	Description string
-	Headers     HeaderType
-	BodyType
+	Headers     map[HttpHeader]NamedParameters
+	bodyType
 }
 
 // NamedParameters are present in the following properties:

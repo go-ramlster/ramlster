@@ -63,10 +63,13 @@ func parseMethod(name string, methodData interface{}) (method Method) {
 				case "description":
 					method.Description = value.(string)
 				case "protocols":
-					//method.Protocols = parseProtocols(value.([]interface{}))
 					method.Protocols = parseStringSlice(value.([]interface{}))
 				case "headers":
 					method.Headers = parseHeaders(value.(map[interface{}]interface{}))
+				case "queryParameters":
+					method.QueryParameters = parseQueryParameters(value.(map[interface{}]interface{}))
+				case "body":
+					method.Body = parseBodies(value.(map[interface{}]interface{}))
 				}
 			}
 		}
@@ -74,24 +77,69 @@ func parseMethod(name string, methodData interface{}) (method Method) {
 	return
 }
 
-func parseStringSlice(stringSlice []interface{}) []string {
-	var strings []string
-	for _, str := range stringSlice {
-		strings = append(strings, str.(string))
+func parseBodies(bodyData map[interface{}]interface{}) map[MediaType]Body {
+	b := make(map[MediaType]Body)
+	for key, value := range bodyData {
+		if mediaType, ok := key.(string); ok {
+			if body, ok := value.(map[interface{}]interface{}); ok {
+				b[MediaType(mediaType)] = parseBody(body)
+			} else {
+				panic("malformated body!")
+			}
+		} else {
+			panic("malformated bodies!")
+		}
 	}
-	return strings
+	return b
 }
-func parseHeaders(headersI map[interface{}]interface{}) HeaderType {
-	h := make(map[HttpHeader]NamedParameters)
-	for key, value := range headersI {
-		if header, ok := key.(string); ok {
-			if params, ok := value.(map[interface{}]interface{}); ok {
-				namedParameters := parseNamedParameters(params)
-				h[HttpHeader(header)] = namedParameters
+
+func parseBody(bodyData map[interface{}]interface{}) (body Body) {
+	for key, value := range bodyData {
+		if bodyField, ok := key.(string); ok {
+			switch bodyField {
+			case "schema":
+				body.Schema = value.(string)
+			case "example":
+				body.Example = value.(string)
+			case "formParameters":
+				body.FormParameters = parseFormParameters(value.(map[interface{}]interface{}))
 			}
 		}
 	}
-	return HeaderType(h)
+	return
+}
+
+func parseFormParameters(formData map[interface{}]interface{}) map[string]NamedParameters {
+	f := make(map[string]NamedParameters)
+	npMap := parseNamedParametersMap(formData)
+	for i, namedParameters := range npMap {
+		if formField, ok := i.(string); ok {
+			f[formField] = namedParameters
+		}
+	}
+	return f
+}
+
+func parseQueryParameters(queryParams map[interface{}]interface{}) map[QueryParameter]NamedParameters {
+	q := make(map[QueryParameter]NamedParameters)
+	npMap := parseNamedParametersMap(queryParams)
+	for i, namedParameters := range npMap {
+		if queryParam, ok := i.(string); ok {
+			q[QueryParameter(queryParam)] = namedParameters
+		}
+	}
+	return q
+}
+
+func parseHeaders(headers map[interface{}]interface{}) map[HttpHeader]NamedParameters {
+	h := make(map[HttpHeader]NamedParameters)
+	npMap := parseNamedParametersMap(headers)
+	for i, namedParameters := range npMap {
+		if header, ok := i.(string); ok {
+			h[HttpHeader(header)] = namedParameters
+		}
+	}
+	return h
 }
 
 func parseNamedParameters(params map[interface{}]interface{}) (namedParameters NamedParameters) {
@@ -108,7 +156,7 @@ func parseNamedParameters(params map[interface{}]interface{}) (namedParameters N
 				namedParameters.Enum = parseStringSlice(value.([]interface{}))
 			case "pattern":
 				namedParameters.Pattern = value.(string)
-			case "MinLength":
+			case "minLength":
 				namedParameters.MinLength = value.(int)
 			case "maxLength":
 				namedParameters.MaxLength = value.(int)
@@ -128,4 +176,22 @@ func parseNamedParameters(params map[interface{}]interface{}) (namedParameters N
 		}
 	}
 	return
+}
+
+func parseStringSlice(stringSlice []interface{}) []string {
+	var strings []string
+	for _, str := range stringSlice {
+		strings = append(strings, str.(string))
+	}
+	return strings
+}
+
+func parseNamedParametersMap(mapInterface map[interface{}]interface{}) map[interface{}]NamedParameters {
+	npMap := make(map[interface{}]NamedParameters)
+	for key, value := range mapInterface {
+		if params, ok := value.(map[interface{}]interface{}); ok {
+			npMap[key] = parseNamedParameters(params)
+		}
+	}
+	return npMap
 }

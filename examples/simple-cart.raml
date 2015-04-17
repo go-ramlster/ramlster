@@ -122,8 +122,21 @@ schemas:
             description: The change currency resource
             post:
                 description: Change currency
+                body: 
+                  application/x-www-form-urlencoded:
+                    formParameters:
+                      AWSAccessKeyId:
+                        description: The AWS Access Key ID.
+                        type: string
+                      acl:
+                        description: Specifies an Amazon S3 access control list.
+                        type: string
         /refresh:
             displayName: Refresh
             description: The refresh resource
             post:
                 description: Refresh the calculation
+                body:
+                  application/json:
+                    schema: cart
+                    
