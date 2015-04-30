@@ -7,8 +7,9 @@ import (
 	"testing"
 )
 
+const expectedBaseUri = "http://simple-service.com"
+
 func TestUnmarshalSimpleCart(t *testing.T) {
-	const expectedBaseUri = "http://simple-service.co"
 	ramlBytes, err := getRamlBytes("./examples/simple-cart.raml")
 	if err != nil {
 		log.Fatal(err)
