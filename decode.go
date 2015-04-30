@@ -1,13 +1,13 @@
 package ramlster
 
 import (
+	"strconv"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v2"
 )
 
-func Unmarshal(data []byte) (raml Raml, err error) {
+func Unmarshal(data []byte) (raml *Raml, err error) {
 	err = yaml.Unmarshal(data, &raml)
 	if err != nil {
 		return
@@ -19,7 +19,6 @@ func Unmarshal(data []byte) (raml Raml, err error) {
 		return
 	}
 	raml.Resources, err = parseResources(ramlMap, nil)
-	spew.Dump(raml)
 	//spew.Dump(ramlMap)
 	return
 }
@@ -70,7 +69,41 @@ func parseMethod(name string, methodData interface{}) (method Method) {
 					method.QueryParameters = parseQueryParameters(value.(map[interface{}]interface{}))
 				case "body":
 					method.Body = parseBodies(value.(map[interface{}]interface{}))
+				case "responses":
+					method.Responses = parseResponses(value.(map[interface{}]interface{}))
 				}
+			}
+		}
+	}
+	return
+}
+
+func parseResponses(responsesData map[interface{}]interface{}) map[HttpStatusCode]Response {
+	r := make(map[HttpStatusCode]Response)
+	for key, value := range responsesData {
+		if statusCodeString, ok := key.(string); ok {
+			if response, ok := value.(map[interface{}]interface{}); ok {
+				statusCode, err := strconv.ParseInt(statusCodeString, 0, 0)
+				if err != nil {
+					panic("not valid http status code!")
+				}
+				r[HttpStatusCode(statusCode)] = parseResponse(response)
+			} else {
+				panic("malformated response!")
+			}
+		} else {
+			panic("malformated responses!")
+		}
+	}
+	return r
+}
+
+func parseResponse(responseData map[interface{}]interface{}) (response Response) {
+	for key, value := range responseData {
+		if responseField, ok := key.(string); ok {
+			switch responseField {
+			case "description":
+				response.Description = value.(string)
 			}
 		}
 	}
