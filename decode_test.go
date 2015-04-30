@@ -7,46 +7,44 @@ import (
 	"testing"
 )
 
-const expectedBaseUri = "http://simple-service.com"
+const cartRaml = "./examples/simple-cart.raml"
+const errorFormat = "%s does not match!\n Expected [%v] but was [%v]"
 
 func TestUnmarshalSimpleCart(t *testing.T) {
-	ramlBytes, err := getRamlBytes("./examples/simple-cart.raml")
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	raml, err := Unmarshal(ramlBytes)
+	const expectedBaseUri = "http://simple-service.com"
+	const expectedMediaType = "application/json"
+
+	raml, err := Unmarshal(getRamlBytes(cartRaml))
 	if err != nil {
 		t.Fatal(err)
 	} else if raml == nil {
 		t.Fatal("returned raml shouldn't be null")
 	}
-	//spew.Dump(raml)
+
 	if raml.BaseUri != expectedBaseUri {
-		t.Errorf("BaseUri does not match!\n Expected: [%s] but got: [%s]", expectedBaseUri, raml.BaseUri)
+		t.Errorf(errorFormat, "BaseUri", expectedBaseUri, raml.BaseUri)
 	}
-	//fmt.Printf("title: %+v\n", raml.Title)
-	//fmt.Printf("baseUri: %+v\n", raml.BaseUri)
-	//fmt.Printf("version: %+v\n", raml.Version)
-	//fmt.Printf("mediaType: %+v\n", raml.MediaType)
-	//fmt.Printf("protocols: %+v\n", raml.Protocols)
-	//for _, resource := range raml.Resources {
-	//fmt.Printf("RelativeUri: %+v\n", resource.RelativeUri)
-	//fmt.Printf("displayName: %+v\n", resource.DisplayName)
-	//fmt.Printf("description: %+v\n", resource.Description)
-	//}
+	if raml.MediaType != expectedMediaType {
+		t.Errorf(errorFormat, "MediaType", expectedMediaType, raml.MediaType)
+	}
+	protocolsSize := len(raml.Protocols)
+	if protocolsSize != 2 {
+		t.Errorf(errorFormat, "Protocols size", 2, protocolsSize)
+	}
+	//spew.Dump(raml)
 }
 
-func getRamlBytes(ramlFilePath string) ([]byte, error) {
+func getRamlBytes(ramlFilePath string) []byte {
 	file, err := os.Open(ramlFilePath)
 	defer file.Close()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
 	source, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return source, nil
+	return source
 }
