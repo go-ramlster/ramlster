@@ -78,3 +78,22 @@ type NamedParameters struct {
 	Required    bool
 	Default     string
 }
+
+func (raml *Raml) GetResources() (resources []Resource) {
+	var f func(resource Resource)
+
+	f = func(resource Resource) {
+		if resource.Resources != nil {
+			for _, r := range resource.Resources {
+				resources = append(resources, r)
+				f(r)
+			}
+		}
+	}
+
+	for _, resource := range raml.Resources {
+		resources = append(resources, resource)
+		f(resource)
+	}
+	return
+}

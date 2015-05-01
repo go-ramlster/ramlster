@@ -8,7 +8,7 @@ import (
 )
 
 const cartRaml = "./examples/simple-cart.raml"
-const errorFormat = "%s does not match!\n Expected [%v] but was [%v]"
+const errorFormat = "%s does not match! Expected [%v] but was [%v]"
 
 func TestUnmarshalSimpleCart(t *testing.T) {
 

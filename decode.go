@@ -32,7 +32,11 @@ func parseResources(ramlMap map[interface{}]interface{}, parentResouce *Resource
 		if k, ok := key.(string); ok {
 			if isResource(k) {
 				resource := Resource{}
-				resource.RelativeUri = k
+				if parentResouce != nil {
+					resource.RelativeUri = parentResouce.RelativeUri + k
+				} else {
+					resource.RelativeUri = k
+				}
 				if v, ok := value.(map[interface{}]interface{}); ok {
 					resource.Resources, err = parseResources(v, &resource)
 				}
