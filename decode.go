@@ -1,6 +1,7 @@
 package ramlster
 
 import (
+	"bytes"
 	"strconv"
 	"strings"
 
@@ -8,10 +9,14 @@ import (
 )
 
 func Unmarshal(data []byte) (raml *Raml, err error) {
+
 	err = yaml.Unmarshal(data, &raml)
 	if err != nil {
 		return
 	}
+
+	specVersion := parseRamlVersion(data)
+	raml.SpecVersion = specVersion
 
 	ramlMap := make(map[interface{}]interface{})
 	err = yaml.Unmarshal(data, &ramlMap)
@@ -21,6 +26,25 @@ func Unmarshal(data []byte) (raml *Raml, err error) {
 	raml.Resources, err = parseResources(ramlMap, nil)
 	//spew.Dump(ramlMap)
 	return
+}
+
+func parseRamlVersion(data []byte) (version string) {
+	buff := bytes.NewBuffer(data)
+	ramlHeader, err := buff.ReadString('\n')
+	if err != nil {
+		panic("Error reading the first line of the raml file")
+	}
+	headerValue := strings.Split(ramlHeader, " ")
+	if len(headerValue) != 2 || headerValue[0] != "#%RAML" {
+		panic("Malformated raml version! Please verify if the raml version is defined in the first line.")
+	}
+
+	ramlVersion := strings.Trim(headerValue[1], "\n")
+
+	if ramlVersion != "0.8" {
+		panic("Unsupported raml version (" + ramlVersion + ")! The supported version is 0.8")
+	}
+	return ramlVersion
 }
 
 func isResource(entry string) bool {

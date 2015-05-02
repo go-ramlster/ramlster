@@ -12,6 +12,7 @@ const errorFormat = "%s does not match! Expected [%v] but was [%v]"
 
 func TestUnmarshalSimpleCart(t *testing.T) {
 
+	const expectedRamlVersion = "0.8"
 	const expectedBaseUri = "http://simple-service.com"
 	const expectedMediaType = "application/json"
 
@@ -22,6 +23,9 @@ func TestUnmarshalSimpleCart(t *testing.T) {
 		t.Fatal("returned raml shouldn't be null")
 	}
 
+	if raml.SpecVersion != expectedRamlVersion {
+		t.Errorf(errorFormat, "Raml Version", expectedRamlVersion, raml.SpecVersion)
+	}
 	if raml.BaseUri != expectedBaseUri {
 		t.Errorf(errorFormat, "BaseUri", expectedBaseUri, raml.BaseUri)
 	}
