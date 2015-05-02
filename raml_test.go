@@ -4,39 +4,41 @@ import "testing"
 
 func TestGetAllResources(t *testing.T) {
 	raml := buildRaml()
+	totalResources := len(raml.GetResources())
 
-	resources := raml.GetResources()
-	if len(resources) != 5 {
-		t.Errorf(errorFormat, "Total resources count", 5, len(resources))
+	if totalResources != 5 {
+		t.Errorf(errorFormat, "Total resources count", 5, totalResources)
 	}
 }
 
 func buildRaml() (raml Raml) {
+	priceResource := buildResource("/price")
+	priceByIdResource := buildResource("/price/{id}")
+	priceByIdCurrencyResource := buildResource("/price/{id}/currency")
+	addSubResource(priceByIdResource, priceByIdCurrencyResource)
+	addSubResource(priceResource, priceByIdResource)
 
-	priceByIdCurrencyResource := buildResource("/price/{id}/currency", nil)
-	priceByIdCurrencyResources := make([]Resource, 0)
-	priceByIdCurrencyResources = append(priceByIdCurrencyResources, priceByIdCurrencyResource)
+	cartResource := buildResource("/cart")
+	cartByIdResource := buildResource("/cart/{id}")
+	addSubResource(cartResource, cartByIdResource)
 
-	priceByIdResources := make([]Resource, 0)
-	priceByIdResources =
-		append(priceByIdResources, buildResource("/price/{id}", priceByIdCurrencyResources))
+	raml.Resources = []Resource{*priceResource, *cartResource}
 
-	priceResource := buildResource("/price", priceByIdResources)
-
-	cartByIdResources := make([]Resource, 0)
-	cartByIdResources = append(cartByIdResources, buildResource("/cart/{id}", nil))
-	cartResource := buildResource("/cart", cartByIdResources)
-
-	ramlResources := make([]Resource, 0)
-	ramlResources = append(ramlResources, priceResource)
-	ramlResources = append(ramlResources, cartResource)
-
-	raml.Resources = ramlResources
 	return
 }
 
-func buildResource(uri string, subresources []Resource) (resource Resource) {
+func buildResource(uri string) (resource *Resource) {
+	resource = new(Resource)
 	resource.RelativeUri = uri
-	resource.Resources = subresources
 	return
+}
+
+func addSubResource(parent, child *Resource) {
+	if len(parent.Resources) > 0 {
+		parent.Resources = append(parent.Resources, *child)
+	} else {
+		resources := make([]Resource, 0)
+		resources = append(resources, *child)
+		parent.Resources = resources
+	}
 }
